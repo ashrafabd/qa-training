@@ -8,7 +8,7 @@ function linkClass(baseClass) {
 }
 
 export function Sidebar({ phases, weeks, ui }: { phases: any[]; weeks: any[]; ui: any }) {
-  const { t, isDone } = useAppContext();
+  const { t, tx, isDone } = useAppContext();
   const { user } = useAuthContext();
 
   return (
@@ -20,13 +20,13 @@ export function Sidebar({ phases, weeks, ui }: { phases: any[]; weeks: any[]; ui
 
         {user?.role === "admin" ? (
           <NavLink className={linkClass("side-link")} to={PATHS.adminDashboard}>
-            🛠 Admin Dashboard
+            🛠 {tx("admin.title")}
           </NavLink>
         ) : null}
 
         {user?.role === "student" ? (
           <NavLink className={linkClass("side-link")} to={PATHS.studentDashboard}>
-            🎓 Student Dashboard
+            🎓 {tx("student.title")}
           </NavLink>
         ) : null}
 
