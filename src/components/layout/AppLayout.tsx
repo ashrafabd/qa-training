@@ -23,6 +23,7 @@ export function AppLayout({ curriculum }: { curriculum: any }) {
 
   return (
     <>
+      <a className="skip-link" href="#main">Skip to content</a>
       <Header ui={curriculum.UI} />
       <div className="layout">
         <Sidebar phases={curriculum.PHASES} weeks={curriculum.WEEKS} ui={curriculum.UI} />

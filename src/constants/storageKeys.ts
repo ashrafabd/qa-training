@@ -3,6 +3,7 @@ export const STORAGE_KEYS = {
   lang: "qa-curriculum-lang",
   theme: "qa-curriculum-theme",
   navCollapsed: "qa-curriculum-nav-collapsed",
+  learningGoal: "qa-learning-goal-v1",
   authSession: "qa-auth-session-v1",
   students: "qa-students-v1"
 };

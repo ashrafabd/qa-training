@@ -62,6 +62,9 @@ export function Sidebar({ phases, weeks, ui }: { phases: any[]; weeks: any[]; ui
         <NavLink className={linkClass("side-link")} to="/resources">
           📚 {t(ui.nav_resources)}
         </NavLink>
+        <NavLink className={linkClass("side-link")} to={PATHS.about}>
+          ℹ {tx("about.nav")}
+        </NavLink>
       </nav>
     </aside>
   );

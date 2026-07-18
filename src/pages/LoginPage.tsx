@@ -23,8 +23,8 @@ export function LoginPage() {
 
     try {
       const result = await login(email, password);
-      if (!result.success) {
-        setError(tx(result.errorKey || "auth.login_failed"));
+      if ("errorKey" in result) {
+        setError(tx(result.errorKey));
         return;
       }
 

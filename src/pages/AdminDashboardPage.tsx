@@ -4,6 +4,8 @@ import { useAppContext } from "../context/AppContext";
 import type { StudentRecord, UserRole } from "../types/auth";
 import { ConfirmDialog } from "../components/common/ConfirmDialog";
 import { ToastStack, type ToastItem, type ToastTone } from "../components/common/ToastStack";
+import { cohortMetrics, phaseProgress } from "../services/learningInsights";
+import { WEEKS } from "../data";
 
 function toDate(value: string | null, lang: "en" | "ar") {
   if (!value) return "-";
@@ -89,6 +91,22 @@ export function AdminDashboardPage() {
   const averageProgress = totalStudents ? Math.round(studentOnly.reduce((sum, student) => sum + student.progressPct, 0) / totalStudents) : 0;
   const topProgress = [...studentOnly].sort((a, b) => b.progressPct - a.progressPct).slice(0, 3);
   const staleStudents = studentOnly.filter((student) => !student.lastActivity || Date.now() - new Date(student.lastActivity).getTime() > 1000 * 60 * 60 * 24 * 7);
+  const cohort = useMemo(() => cohortMetrics(students), [students]);
+
+  const phaseAverages = useMemo(() => {
+    const results = [1, 2, 3, 4].map((phaseId) => ({ phaseId, avg: 0 }));
+    if (!studentOnly.length) return results;
+
+    results.forEach((item) => {
+      const pcts = studentOnly.map((student) => {
+        const row = phaseProgress(student, WEEKS).find((entry) => entry.phase === item.phaseId);
+        return row?.pct || 0;
+      });
+      item.avg = Math.round(pcts.reduce((acc, value) => acc + value, 0) / pcts.length);
+    });
+
+    return results;
+  }, [studentOnly]);
 
   const recentlyLoggedIn = [...studentOnly]
     .filter((student) => !!student.lastLogin)
@@ -217,6 +235,35 @@ export function AdminDashboardPage() {
         <article className="card stat-card"><h3>{tx("admin.active_students")}</h3><p className="stat-value">{activeStudents}</p></article>
         <article className="card stat-card"><h3>{tx("admin.average_progress")}</h3><p className="stat-value">{averageProgress}%</p></article>
         <article className="card stat-card"><h3>{tx("admin.inactive_recently")}</h3><p className="stat-value">{staleStudents.length}</p></article>
+      </section>
+
+      <section className="card">
+        <h2>{tx("admin.analytics_title")}</h2>
+        <div className="stats-grid">
+          <article className="card stat-card">
+            <h3>{tx("admin.active_7d")}</h3>
+            <p className="stat-value">{cohort.active7d}/{cohort.total}</p>
+          </article>
+          <article className="card stat-card">
+            <h3>{tx("admin.risk_students")}</h3>
+            <p className="stat-value">{cohort.risk}</p>
+          </article>
+          <article className="card stat-card">
+            <h3>{tx("admin.velocity")}</h3>
+            <p className="stat-value">{cohort.velocity}</p>
+          </article>
+        </div>
+
+        <h3>{tx("admin.phase_performance")}</h3>
+        <div className="phase-performance-grid">
+          {phaseAverages.map((entry) => (
+            <div key={entry.phaseId} className="phase-performance-row">
+              <strong>{tx("common.week_short")}P{entry.phaseId}</strong>
+              <div className="bar bar-mini"><div className="bar-fill" style={{ width: `${entry.avg}%` }} /></div>
+              <span>{entry.avg}%</span>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="card">

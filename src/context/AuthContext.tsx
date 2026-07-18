@@ -16,12 +16,16 @@ import {
   verifyPassword
 } from "../services/studentRepository";
 
+type LoginResult =
+  | { success: true; role: UserRole }
+  | { success: false; errorKey: "auth.invalid_credentials" | "auth.account_disabled" };
+
 interface AuthContextValue {
   user: StudentRecord | null;
   students: StudentRecord[];
   loading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; errorKey?: "auth.invalid_credentials" | "auth.account_disabled"; role?: UserRole }>;
+  login: (email: string, password: string) => Promise<LoginResult>;
   logout: () => void;
   refreshStudents: () => Promise<void>;
   addStudentRecord: (input: StudentCreateInput) => Promise<StudentRecord>;
@@ -100,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })();
   }, [hydrateSession]);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string): Promise<LoginResult> => {
     const account = await findStudentByEmail(email.trim().toLowerCase());
     if (!account) return { success: false, errorKey: "auth.invalid_credentials" };
     if (account.status !== "active") return { success: false, errorKey: "auth.account_disabled" };

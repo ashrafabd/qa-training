@@ -9,10 +9,33 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function createId() {
+  const randomUUID = globalThis.crypto?.randomUUID;
+  if (typeof randomUUID === "function") {
+    return randomUUID.call(globalThis.crypto);
+  }
+
+  const ts = Date.now().toString(36);
+  const rnd = Math.floor(Math.random() * 1e12).toString(36);
+  return `id-${ts}-${rnd}`;
+}
+
 async function hashPassword(password: string) {
   const data = new TextEncoder().encode(password);
-  const digest = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  const subtle = globalThis.crypto?.subtle;
+
+  if (subtle) {
+    const digest = await subtle.digest("SHA-256", data);
+    return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  }
+
+  // Fallback for environments where Web Crypto is not available.
+  let hash = 2166136261;
+  for (let i = 0; i < password.length; i += 1) {
+    hash ^= password.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `fallback-${(hash >>> 0).toString(16).padStart(8, "0")}`;
 }
 
 function computeProgress(completedLessons: string[]) {
@@ -82,7 +105,7 @@ async function ensureSeedData() {
   const baseDate = nowIso();
   const seed: StudentRecord[] = [
     {
-      id: crypto.randomUUID(),
+      id: createId(),
       fullName: "Admin User",
       email: "admin@qa.local",
       passwordHash: adminPwd,
@@ -97,7 +120,7 @@ async function ensureSeedData() {
       status: "active"
     },
     {
-      id: crypto.randomUUID(),
+      id: createId(),
       fullName: "Student User",
       email: "student@qa.local",
       passwordHash: studentPwd,
@@ -149,7 +172,7 @@ export async function addStudent(input: StudentCreateInput) {
 
   const passwordHash = await hashPassword(input.password);
   const base: StudentRecord = {
-    id: crypto.randomUUID(),
+    id: createId(),
     fullName: input.fullName,
     email: input.email.trim().toLowerCase(),
     passwordHash,

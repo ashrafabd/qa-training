@@ -3,6 +3,7 @@ export const PATHS = {
   adminDashboard: "/admin-dashboard",
   studentDashboard: "/student-dashboard",
   accessDenied: "/access-denied",
+  about: "/about",
   home: "/",
   phase: "/phase/:id",
   week: "/week/:num",

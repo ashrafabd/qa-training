@@ -1,15 +1,32 @@
 import { Link, useParams } from "react-router-dom";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { useScrollTop } from "../hooks/useScrollTop";
 import { fmt, fmtTime } from "../utils/i18n";
 import { Breadcrumb } from "../components/common/Breadcrumb";
+
+function detectLang(text: string) {
+  const hasAr = /[\u0600-\u06FF]/.test(text);
+  const hasEn = /[A-Za-z]/.test(text);
+  if (hasAr && hasEn) return "both";
+  if (hasAr) return "ar";
+  if (hasEn) return "en";
+  return "both";
+}
+
+function parseDurationHours(timeText: string) {
+  const match = String(timeText).match(/(\d+(?:\.\d+)?)/);
+  return match ? Number(match[1]) : 0;
+}
 
 export function SearchPage({ curriculum }) {
   const { q } = useParams();
   const query = decodeURIComponent(q || "");
   const { WEEKS, UI } = curriculum;
   const { t, tx, lang } = useAppContext();
+  const [phaseFilter, setPhaseFilter] = useState<string>("all");
+  const [langFilter, setLangFilter] = useState<string>("all");
+  const [durationFilter, setDurationFilter] = useState<string>("all");
 
   useScrollTop([q]);
 
@@ -30,14 +47,23 @@ export function SearchPage({ curriculum }) {
           .join(" ")
           .toLowerCase();
 
-        if (haystack.includes(needle)) {
-          result.push({ week, day });
-        }
+        if (!haystack.includes(needle)) return;
+
+        const dominantLang = detectLang(haystack);
+        const duration = parseDurationHours(day.time);
+
+        if (phaseFilter !== "all" && String(week.phase) !== phaseFilter) return;
+        if (langFilter !== "all" && dominantLang !== langFilter) return;
+        if (durationFilter === "short" && duration >= 3) return;
+        if (durationFilter === "medium" && (duration < 3 || duration > 5)) return;
+        if (durationFilter === "long" && duration <= 5) return;
+
+        result.push({ week, day });
       });
     });
 
     return result;
-  }, [WEEKS, query]);
+  }, [WEEKS, query, phaseFilter, langFilter, durationFilter]);
 
   return (
     <>
@@ -51,6 +77,40 @@ export function SearchPage({ curriculum }) {
       <section className="page-header">
         <h1>{t(UI.search_results)}</h1>
         <p className="lead">{fmt(t(UI.search_matching), { n: hits.length, q: query })}</p>
+      </section>
+
+      <section className="card">
+        <h3>{tx("search.filters")}</h3>
+        <div className="search-filter-grid">
+          <label>
+            {tx("search.filter_phase")}
+            <select value={phaseFilter} onChange={(event) => setPhaseFilter(event.target.value)}>
+              <option value="all">{tx("search.any")}</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+          </label>
+          <label>
+            {tx("search.filter_language")}
+            <select value={langFilter} onChange={(event) => setLangFilter(event.target.value)}>
+              <option value="all">{tx("search.any")}</option>
+              <option value="en">{tx("search.lang_en")}</option>
+              <option value="ar">{tx("search.lang_ar")}</option>
+              <option value="both">{tx("search.lang_both")}</option>
+            </select>
+          </label>
+          <label>
+            {tx("search.filter_duration")}
+            <select value={durationFilter} onChange={(event) => setDurationFilter(event.target.value)}>
+              <option value="all">{tx("search.any")}</option>
+              <option value="short">{tx("search.duration_short")}</option>
+              <option value="medium">{tx("search.duration_medium")}</option>
+              <option value="long">{tx("search.duration_long")}</option>
+            </select>
+          </label>
+        </div>
       </section>
 
       {!hits.length ? (
