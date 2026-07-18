@@ -1,0 +1,19 @@
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { HashRouter } from "react-router-dom";
+import App from "./App";
+import { AppProvider } from "./context/AppContext";
+import { AuthProvider } from "./context/AuthContext";
+import "./assets/styles/styles.css";
+
+createRoot(document.getElementById("root")).render(
+  <StrictMode>
+    <HashRouter>
+      <AuthProvider>
+        <AppProvider>
+          <App />
+        </AppProvider>
+      </AuthProvider>
+    </HashRouter>
+  </StrictMode>
+);

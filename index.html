@@ -1,11 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" dir="ltr" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>QA Automation Engineer — 16-Week Training Curriculum · منهج تدريب QA</title>
   <meta name="description" content="A bilingual (EN/AR) 16-week, 320-hour professional QA training program: manual testing (ISTQB FL), JavaScript, Cypress automation, and API testing with Postman." />
-  <!-- Anti-flash: apply saved theme/lang before paint -->
   <script>
     (function () {
       try {
@@ -20,47 +19,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/styles.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧪</text></svg>" />
 </head>
 <body>
-  <header class="app-header">
-    <button id="nav-toggle" class="icon-btn nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar-nav"><span class="nav-toggle-bars" aria-hidden="true"></span></button>
-    <a class="brand" href="#/">
-      <span class="logo">QA</span>
-      <span class="brand-text"><span id="brand-title">QA Automation Engineer</span><small id="brand-sub">16-Week Professional Curriculum</small></span>
-    </a>
-    <div class="header-spacer"></div>
-    <span class="progress-pill" title="Overall completion"><span class="pp-dot"></span><span id="header-progress">0%</span></span>
-    <div class="search-wrap">
-      <input id="search-input" type="search" placeholder="Search sessions…" aria-label="Search the curriculum" />
-    </div>
-    <button id="lang-btn" class="icon-btn text-btn" title="Language / اللغة">العربية</button>
-    <button id="theme-btn" class="icon-btn text-btn" title="Theme">🌙 Dark</button>
-    <button id="print-btn" class="icon-btn" title="Print / Save as PDF">🖨</button>
-  </header>
-
-  <div class="layout">
-    <aside class="sidebar">
-      <nav id="sidebar-nav"></nav>
-    </aside>
-    <main id="main" class="content"><!-- rendered by app.js --></main>
-  </div>
-
-  <div id="nav-backdrop" class="nav-backdrop"></div>
-
-  <footer class="app-footer">
-    <span id="footer-text"></span>
-  </footer>
-
-  <!-- Data: core first (helpers + META/PHASES/UI/RESOURCES/ASSESSMENTS), then phases push weeks -->
-  <script src="assets/js/data-core.js"></script>
-  <script src="assets/js/data-phase1.js"></script>
-  <script src="assets/js/data-phase2.js"></script>
-  <script src="assets/js/data-phase3.js"></script>
-  <script src="assets/js/data-phase4.js"></script>
-  <script src="assets/js/app.js"></script>
-  <!-- Visual enhancement layer (additive 3D / motion; no effect on app logic) -->
-  <script src="assets/js/fx.js"></script>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>
