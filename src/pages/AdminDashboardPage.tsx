@@ -1,15 +1,17 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useAuthContext } from "../context/AuthContext";
+import { useAppContext } from "../context/AppContext";
 import type { StudentRecord, UserRole } from "../types/auth";
 import { ConfirmDialog } from "../components/common/ConfirmDialog";
 import { ToastStack, type ToastItem, type ToastTone } from "../components/common/ToastStack";
 
-function toDate(value: string | null) {
+function toDate(value: string | null, lang: "en" | "ar") {
   if (!value) return "-";
-  return new Date(value).toLocaleString();
+  return new Date(value).toLocaleString(lang === "ar" ? "ar-EG" : "en-US");
 }
 
 export function AdminDashboardPage() {
+  const { tx, lang } = useAppContext();
   const {
     students,
     user,
@@ -28,7 +30,7 @@ export function AdminDashboardPage() {
   const [confirmTitle, setConfirmTitle] = useState("");
   const [confirmMessage, setConfirmMessage] = useState("");
   const [confirmAction, setConfirmAction] = useState<null | (() => Promise<void>)>(null);
-  const [form, setForm] = useState({ fullName: "", email: "", password: "", role: "student" as UserRole, assignedCourses: "QA Automation Engineer 16-Week Track" });
+  const [form, setForm] = useState({ fullName: "", email: "", password: "", role: "student" as UserRole, assignedCourses: tx("admin.default_course") });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [openActionsFor, setOpenActionsFor] = useState<string | null>(null);
 
@@ -64,7 +66,7 @@ export function AdminDashboardPage() {
     try {
       await confirmAction();
     } catch (error: any) {
-      pushToast(error?.message || "Action failed.", "error");
+      pushToast(error?.message || tx("admin.error_action_failed"), "error");
     } finally {
       setConfirmOpen(false);
       setConfirmAction(null);
@@ -106,7 +108,7 @@ export function AdminDashboardPage() {
 
   function clearForm() {
     setEditingId(null);
-    setForm({ fullName: "", email: "", password: "", role: "student", assignedCourses: "QA Automation Engineer 16-Week Track" });
+    setForm({ fullName: "", email: "", password: "", role: "student", assignedCourses: tx("admin.default_course") });
   }
 
   async function onSubmit(event: FormEvent) {
@@ -128,13 +130,13 @@ export function AdminDashboardPage() {
     });
 
     if (!fullName || !email) {
-      pushToast("Full name and email are required.", "error");
+      pushToast(tx("admin.error_required"), "error");
       return;
     }
 
     const duplicateEmail = students.find((student) => student.email.toLowerCase() === email && student.id !== editingId);
     if (duplicateEmail) {
-      pushToast("A student with this email already exists.", "error");
+      pushToast(tx("admin.error_duplicate_email"), "error");
       return;
     }
 
@@ -155,88 +157,88 @@ export function AdminDashboardPage() {
           role: payload.role,
           assignedCourses: payload.assignedCourses
         });
-        pushToast("Student updated successfully.", "success");
+        pushToast(tx("admin.success_updated"), "success");
       } else {
         await addStudentRecord(payload);
-        pushToast("Student added successfully.", "success");
+        pushToast(tx("admin.success_added"), "success");
       }
       clearForm();
     } catch (error: any) {
-      pushToast(error?.message || "Action failed.", "error");
+      pushToast(error?.message || tx("admin.error_action_failed"), "error");
     }
   }
 
   async function onDelete(studentId: string) {
-    requestConfirmation("Delete Student", "Delete this student account? This action cannot be undone.", async () => {
+    requestConfirmation(tx("admin.confirm_delete_title"), tx("admin.confirm_delete_message"), async () => {
       await deleteStudentRecord(studentId);
-      pushToast("Student deleted successfully.", "success");
+      pushToast(tx("admin.success_deleted"), "success");
     });
     setOpenActionsFor(null);
   }
 
   async function onToggleStatus(student: StudentRecord) {
     requestConfirmation(
-      student.status === "active" ? "Disable Account" : "Enable Account",
+      student.status === "active" ? tx("admin.confirm_disable_title") : tx("admin.confirm_enable_title"),
       student.status === "active"
-        ? "Disable this account? The student will not be able to log in."
-        : "Enable this account so the student can log in again?",
+        ? tx("admin.confirm_disable_message")
+        : tx("admin.confirm_enable_message"),
       async () => {
         await updateStudentRecord(student.id, { status: student.status === "active" ? "disabled" : "active" });
-        pushToast("Student status updated.", "success");
+        pushToast(tx("admin.success_status"), "success");
       }
     );
     setOpenActionsFor(null);
   }
 
   async function onResetProgress(studentId: string) {
-    requestConfirmation("Reset Student Progress", "Reset this student's progress to zero?", async () => {
+    requestConfirmation(tx("admin.confirm_reset_student_title"), tx("admin.confirm_reset_student_message"), async () => {
       await resetStudentProgressById(studentId);
-      pushToast("Student progress reset.", "success");
+      pushToast(tx("admin.success_reset_student"), "success");
     });
     setOpenActionsFor(null);
   }
 
   async function onResetAll() {
-    requestConfirmation("Reset All Progress", "Reset progress for ALL students? This affects every account.", async () => {
+    requestConfirmation(tx("admin.confirm_reset_all_title"), tx("admin.confirm_reset_all_message"), async () => {
       await resetAllProgress();
-      pushToast("All student progress was reset.", "success");
+      pushToast(tx("admin.success_reset_all"), "success");
     });
   }
 
   return (
     <>
       <section className="page-header">
-        <h1>Admin Dashboard</h1>
-        <p className="lead">Manage student accounts, progress, and access.</p>
+        <h1>{tx("admin.title")}</h1>
+        <p className="lead">{tx("admin.subtitle")}</p>
       </section>
 
       <section className="stats-grid">
-        <article className="card stat-card"><h3>Total Students</h3><p className="stat-value">{totalStudents}</p></article>
-        <article className="card stat-card"><h3>Active Students</h3><p className="stat-value">{activeStudents}</p></article>
-        <article className="card stat-card"><h3>Average Progress</h3><p className="stat-value">{averageProgress}%</p></article>
-        <article className="card stat-card"><h3>Inactive Recently</h3><p className="stat-value">{staleStudents.length}</p></article>
+        <article className="card stat-card"><h3>{tx("admin.total_students")}</h3><p className="stat-value">{totalStudents}</p></article>
+        <article className="card stat-card"><h3>{tx("admin.active_students")}</h3><p className="stat-value">{activeStudents}</p></article>
+        <article className="card stat-card"><h3>{tx("admin.average_progress")}</h3><p className="stat-value">{averageProgress}%</p></article>
+        <article className="card stat-card"><h3>{tx("admin.inactive_recently")}</h3><p className="stat-value">{staleStudents.length}</p></article>
       </section>
 
       <section className="card">
-        <h2>{editingId ? "Edit Student" : "Add Student"}</h2>
+        <h2>{editingId ? tx("admin.edit_student") : tx("admin.add_student")}</h2>
         <form className="admin-form" onSubmit={onSubmit}>
-          <label>Full name<input value={form.fullName} onChange={(e) => setForm((prev) => ({ ...prev, fullName: e.target.value }))} required /></label>
-          <label>Email<input type="email" value={form.email} onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))} required /></label>
-          <label>Password<input type="password" value={form.password} onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))} placeholder={editingId ? "Leave empty to keep current password" : "Required"} required={!editingId} /></label>
-          <label>Role
+          <label>{tx("admin.full_name")}<input value={form.fullName} onChange={(e) => setForm((prev) => ({ ...prev, fullName: e.target.value }))} required /></label>
+          <label>{tx("admin.email")}<input type="email" value={form.email} onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))} required /></label>
+          <label>{tx("admin.password")}<input type="password" value={form.password} onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))} placeholder={editingId ? tx("admin.password_keep") : tx("admin.password_required")} required={!editingId} /></label>
+          <label>{tx("admin.role")}
             <select value={form.role} onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value as UserRole }))}>
-              <option value="student">Student</option>
-              <option value="admin">Admin</option>
+              <option value="student">{tx("role.student")}</option>
+              <option value="admin">{tx("role.admin")}</option>
             </select>
           </label>
-          <label>Assigned courses (comma separated)
+          <label>{tx("admin.assigned_courses")}
             <input value={form.assignedCourses} onChange={(e) => setForm((prev) => ({ ...prev, assignedCourses: e.target.value }))} />
           </label>
           <div className="action-row">
-            <button type="submit" className="btn">{editingId ? "Save Changes" : "Add Student"}</button>
-            {editingId ? <button type="button" className="btn-ghost" onClick={clearForm}>Cancel</button> : null}
-            <button type="button" className="btn-ghost" onClick={onResetAll}>Reset All Progress</button>
-            <button type="button" className="btn-ghost" onClick={logout}>Logout</button>
+            <button type="submit" className="btn">{editingId ? tx("admin.save_changes") : tx("admin.add_student")}</button>
+            {editingId ? <button type="button" className="btn-ghost" onClick={clearForm}>{tx("admin.cancel")}</button> : null}
+            <button type="button" className="btn-ghost" onClick={onResetAll}>{tx("admin.reset_all_progress")}</button>
+            <button type="button" className="btn-ghost" onClick={logout}>{tx("common.logout")}</button>
           </div>
         </form>
       </section>
@@ -247,28 +249,28 @@ export function AdminDashboardPage() {
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search students by name or email"
+            placeholder={tx("admin.search_placeholder")}
             className="admin-search"
           />
           <select className="admin-filter-select" value={filter} onChange={(e) => setFilter(e.target.value as "all" | "active" | "disabled")}> 
-            <option value="all">All</option>
-            <option value="active">Active</option>
-            <option value="disabled">Disabled</option>
+            <option value="all">{tx("admin.filter_all")}</option>
+            <option value="active">{tx("admin.filter_active")}</option>
+            <option value="disabled">{tx("admin.filter_disabled")}</option>
           </select>
         </div>
         <table className="week-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Status</th>
-              <th>Progress</th>
-              <th>Completed</th>
-              <th>Remaining</th>
-              <th>Last Activity</th>
-              <th>Last Login</th>
-              <th>Registered</th>
-              <th>Actions</th>
+              <th>{tx("admin.col_name")}</th>
+              <th>{tx("admin.col_email")}</th>
+              <th>{tx("admin.col_status")}</th>
+              <th>{tx("admin.col_progress")}</th>
+              <th>{tx("admin.col_completed")}</th>
+              <th>{tx("admin.col_remaining")}</th>
+              <th>{tx("admin.col_last_activity")}</th>
+              <th>{tx("admin.col_last_login")}</th>
+              <th>{tx("admin.col_registered")}</th>
+              <th>{tx("admin.col_actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -276,13 +278,13 @@ export function AdminDashboardPage() {
               <tr key={student.id}>
                 <td>{student.fullName}</td>
                 <td>{student.email}</td>
-                <td>{student.status}</td>
+                <td>{student.status === "active" ? tx("status.active") : tx("status.disabled")}</td>
                 <td>{student.progressPct}%</td>
                 <td>{student.completedLessons.length}</td>
                 <td>{student.remainingLessons}</td>
-                <td>{toDate(student.lastActivity)}</td>
-                <td>{toDate(student.lastLogin)}</td>
-                <td>{toDate(student.registrationDate)}</td>
+                <td>{toDate(student.lastActivity, lang)}</td>
+                <td>{toDate(student.lastLogin, lang)}</td>
+                <td>{toDate(student.registrationDate, lang)}</td>
                 <td className="actions-cell">
                   <div className="row-action-menu">
                     <button
@@ -304,17 +306,17 @@ export function AdminDashboardPage() {
                             setOpenActionsFor(null);
                           }}
                         >
-                          Edit
+                          {tx("admin.action_edit")}
                         </button>
                         <button className="btn-ghost" role="menuitem" onClick={() => onToggleStatus(student)}>
-                          {student.status === "active" ? "Disable" : "Enable"}
+                          {student.status === "active" ? tx("admin.action_disable") : tx("admin.action_enable")}
                         </button>
                         <button className="btn-ghost" role="menuitem" onClick={() => onResetProgress(student.id)}>
-                          Reset Progress
+                          {tx("admin.action_reset_progress")}
                         </button>
                         {user?.id !== student.id ? (
                           <button className="btn-ghost" role="menuitem" onClick={() => onDelete(student.id)}>
-                            Delete
+                            {tx("admin.action_delete")}
                           </button>
                         ) : null}
                       </div>
@@ -329,19 +331,19 @@ export function AdminDashboardPage() {
 
       <section className="stats-grid">
         <article className="card">
-          <h3>Recently Logged In</h3>
+          <h3>{tx("admin.recently_logged_in")}</h3>
           <ul className="checklist">
             {recentlyLoggedIn.map((student) => <li key={student.id}>{student.fullName}</li>)}
           </ul>
         </article>
         <article className="card">
-          <h3>Top Progress Students</h3>
+          <h3>{tx("admin.top_progress")}</h3>
           <ul className="checklist">
             {topProgress.map((student) => <li key={student.id}>{student.fullName} ({student.progressPct}%)</li>)}
           </ul>
         </article>
         <article className="card">
-          <h3>Not Active Recently</h3>
+          <h3>{tx("admin.not_active_recently")}</h3>
           <ul className="checklist">
             {staleStudents.slice(0, 5).map((student) => <li key={student.id}>{student.fullName}</li>)}
           </ul>
@@ -352,8 +354,8 @@ export function AdminDashboardPage() {
         open={confirmOpen}
         title={confirmTitle}
         message={confirmMessage}
-        confirmLabel="Confirm"
-        cancelLabel="Cancel"
+        confirmLabel={tx("common.confirm")}
+        cancelLabel={tx("common.cancel")}
         onConfirm={handleConfirmAction}
         onCancel={() => {
           setConfirmOpen(false);

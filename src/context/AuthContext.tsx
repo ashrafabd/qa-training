@@ -21,7 +21,7 @@ interface AuthContextValue {
   students: StudentRecord[];
   loading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string; role?: UserRole }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; errorKey?: "auth.invalid_credentials" | "auth.account_disabled"; role?: UserRole }>;
   logout: () => void;
   refreshStudents: () => Promise<void>;
   addStudentRecord: (input: StudentCreateInput) => Promise<StudentRecord>;
@@ -102,11 +102,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const account = await findStudentByEmail(email.trim().toLowerCase());
-    if (!account) return { success: false, error: "Invalid email or password." };
-    if (account.status !== "active") return { success: false, error: "This account is disabled." };
+    if (!account) return { success: false, errorKey: "auth.invalid_credentials" };
+    if (account.status !== "active") return { success: false, errorKey: "auth.account_disabled" };
 
     const isValid = await verifyPassword(account, password);
-    if (!isValid) return { success: false, error: "Invalid email or password." };
+    if (!isValid) return { success: false, errorKey: "auth.invalid_credentials" };
 
     const loggedIn = await updateLastLogin(account.id);
     const session: AuthSession = {

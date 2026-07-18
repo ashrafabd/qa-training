@@ -1,10 +1,12 @@
 import { FormEvent, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
+import { useAppContext } from "../context/AppContext";
 import { PATHS } from "../routes/paths";
 
 export function LoginPage() {
   const { login } = useAuthContext();
+  const { tx } = useAppContext();
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState("");
@@ -22,7 +24,7 @@ export function LoginPage() {
     try {
       const result = await login(email, password);
       if (!result.success) {
-        setError(result.error || "Login failed.");
+        setError(tx(result.errorKey || "auth.login_failed"));
         return;
       }
 
@@ -44,26 +46,26 @@ export function LoginPage() {
   return (
     <div className="auth-page-wrap">
       <section className="card auth-card">
-        <h1>Login</h1>
-        <p className="muted">Use your account to access the curriculum dashboard.</p>
-        <p className="small muted">Demo Admin: admin@qa.local / admin123</p>
-        <p className="small muted">Demo Student: student@qa.local / student123</p>
+        <h1>{tx("auth.login_title")}</h1>
+        <p className="muted">{tx("auth.login_subtitle")}</p>
+        <p className="small muted">{tx("auth.demo_admin")}</p>
+        <p className="small muted">{tx("auth.demo_student")}</p>
 
         <form onSubmit={onSubmit} className="auth-form">
           <label>
-            Email
+            {tx("auth.email")}
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="username" />
           </label>
 
           <label>
-            Password
+            {tx("auth.password")}
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
           </label>
 
           {error ? <p className="form-error">{error}</p> : null}
 
           <button type="submit" className="btn" disabled={isSubmitting}>
-            {isSubmitting ? "Signing in..." : "Sign in"}
+            {isSubmitting ? tx("auth.signing_in") : tx("auth.sign_in")}
           </button>
         </form>
       </section>

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { tk } from "../utils/i18n";
 
 export function useFxEnhancements() {
   useEffect(() => {
@@ -24,7 +25,8 @@ export function useFxEnhancements() {
       const button = document.createElement("button");
       button.className = "fx-top";
       button.type = "button";
-      button.setAttribute("aria-label", "Back to top");
+      const lang = document.documentElement.getAttribute("lang") === "ar" ? "ar" : "en";
+      button.setAttribute("aria-label", tk("common.back_to_top", lang));
       button.textContent = "↑";
       button.addEventListener("click", () => {
         window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });

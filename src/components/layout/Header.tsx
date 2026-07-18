@@ -8,6 +8,7 @@ import { PATHS } from "../../routes/paths";
 export function Header({ ui }: { ui: any }) {
   const {
     t,
+    tx,
     lang,
     theme,
     setLang,
@@ -31,7 +32,7 @@ export function Header({ ui }: { ui: any }) {
       <button
         id="nav-toggle"
         className="icon-btn nav-toggle"
-        aria-label="Toggle navigation"
+        aria-label={tx("common.toggle_navigation")}
         aria-expanded={navExpanded}
         aria-controls="sidebar-nav"
         onClick={() => {
@@ -55,7 +56,7 @@ export function Header({ ui }: { ui: any }) {
 
       <div className="header-spacer" />
 
-      <span className="progress-pill" title="Overall completion">
+      <span className="progress-pill" title={tx("common.overall_completion")}>
         <span className="pp-dot" />
         <span>{progressPct}%</span>
       </span>
@@ -66,7 +67,7 @@ export function Header({ ui }: { ui: any }) {
           type="search"
           value={query}
           placeholder={t(ui.search_placeholder)}
-          aria-label="Search the curriculum"
+          aria-label={tx("common.search_curriculum")}
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter" && query.trim()) {
@@ -78,14 +79,14 @@ export function Header({ ui }: { ui: any }) {
 
       {user ? (
         <Link className="icon-btn text-btn" to={user.role === "admin" ? PATHS.adminDashboard : PATHS.studentDashboard}>
-          {user.role === "admin" ? "Admin" : "Student"}
+          {user.role === "admin" ? tx("role.admin") : tx("role.student")}
         </Link>
       ) : null}
 
       <button
         id="lang-btn"
         className="icon-btn text-btn"
-        title="Language / اللغة"
+        title={tx("common.language_toggle_title")}
         onClick={() => setLang(lang === "en" ? "ar" : "en")}
       >
         {t(ui.lang_btn)}
@@ -94,7 +95,7 @@ export function Header({ ui }: { ui: any }) {
       <button
         id="theme-btn"
         className="icon-btn text-btn"
-        title="Theme"
+        title={tx("common.theme")}
         onClick={() => setTheme(theme === "light" ? "dark" : "light")}
       >
         {theme === "dark" ? "☀" : "🌙"} {theme === "dark" ? t(ui.theme_light) : t(ui.theme_dark)}
@@ -118,7 +119,7 @@ export function Header({ ui }: { ui: any }) {
             navigate(PATHS.login);
           }}
         >
-          Logout
+          {tx("common.logout")}
         </button>
       ) : null}
     </header>

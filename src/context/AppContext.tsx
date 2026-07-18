@@ -2,11 +2,12 @@ import { createContext, type Dispatch, type SetStateAction, useCallback, useCont
 import { STORAGE_KEYS } from "../constants/storageKeys";
 import { WEEKS } from "../data";
 import { progressKey } from "../services/progressService";
-import { tr } from "../utils/i18n";
+import { tk, tr } from "../utils/i18n";
 import { useAuthContext } from "./AuthContext";
+import type { LocaleCode, LocaleKey } from "../locales";
 
 interface AppContextValue {
-  lang: string;
+  lang: LocaleCode;
   theme: string;
   progressData: Record<string, boolean>;
   totalDays: number;
@@ -14,7 +15,7 @@ interface AppContextValue {
   progressPct: number;
   navOpen: boolean;
   navCollapsed: boolean;
-  setLang: Dispatch<SetStateAction<string>>;
+  setLang: Dispatch<SetStateAction<LocaleCode>>;
   setTheme: Dispatch<SetStateAction<string>>;
   setNavOpen: Dispatch<SetStateAction<boolean>>;
   setNavCollapsed: Dispatch<SetStateAction<boolean>>;
@@ -22,12 +23,14 @@ interface AppContextValue {
   toggleDone: (weekNum: number, dayNum: number) => Promise<void>;
   resetProgress: () => Promise<void>;
   t: (value: any) => any;
+  tx: (key: LocaleKey, vars?: Record<string, string | number>) => string;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
 
 function getInitialLang() {
-  return localStorage.getItem(STORAGE_KEYS.lang) || "en";
+  const value = localStorage.getItem(STORAGE_KEYS.lang);
+  return value === "ar" ? "ar" : "en";
 }
 
 function getInitialTheme() {
@@ -40,7 +43,7 @@ function getInitialNavCollapsed() {
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const { user, updateOwnProgress } = useAuthContext();
-  const [lang, setLang] = useState(getInitialLang);
+  const [lang, setLang] = useState<LocaleCode>(getInitialLang);
   const [theme, setTheme] = useState(getInitialTheme);
   const [progressData, setProgressData] = useState<Record<string, boolean>>({});
   const [navOpen, setNavOpen] = useState(false);
@@ -127,7 +130,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       isDone,
       toggleDone,
       resetProgress,
-      t: (value: any) => tr(value, lang)
+      t: (value: any) => tr(value, lang),
+      tx: (key: LocaleKey, vars = {}) => tk(key, lang, vars)
     }),
     [lang, theme, progressData, totalDays, doneCount, progressPct, navOpen, navCollapsed, isDone, toggleDone, resetProgress]
   );

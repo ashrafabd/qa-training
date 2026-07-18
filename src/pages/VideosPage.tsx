@@ -8,14 +8,14 @@ function ytSearch(query) {
   return `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
 }
 
-function LangBadge({ lang }) {
-  const txt = lang === "ar" ? "AR" : lang === "en" ? "EN" : "EN·AR";
+function LangBadge({ lang, tx }) {
+  const txt = lang === "ar" ? tx("videos.lang_ar") : lang === "en" ? tx("videos.lang_en") : tx("videos.lang_both");
   return <span className={`vid-lang vid-${lang || "both"}`}>{txt}</span>;
 }
 
 export function VideosPage({ curriculum }) {
   const { CHANNELS, VIDEOS, PHASES, UI } = curriculum;
-  const { t } = useAppContext();
+  const { t, tx } = useAppContext();
 
   useScrollTop([]);
 
@@ -44,7 +44,7 @@ export function VideosPage({ curriculum }) {
                 <strong>{channel.name}</strong>
                 <div className="muted small">{t(channel.note)}</div>
               </div>
-              <LangBadge lang={channel.lang} />
+              <LangBadge lang={channel.lang} tx={tx} />
             </a>
           ))}
         </div>
@@ -75,9 +75,9 @@ export function VideosPage({ curriculum }) {
                   <span className="yt-badge">▶</span>
                   <div className="video-meta">
                     <strong>{t(video.name)}</strong>
-                    <span className="muted small">{video.url ? "YouTube" : t(UI.watch_yt)}</span>
+                    <span className="muted small">{video.url ? tx("videos.youtube") : t(UI.watch_yt)}</span>
                   </div>
-                  <LangBadge lang={video.lang} />
+                  <LangBadge lang={video.lang} tx={tx} />
                 </a>
               ))}
             </div>

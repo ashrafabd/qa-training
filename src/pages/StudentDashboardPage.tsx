@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
 import { useMemo } from "react";
 import { useAuthContext } from "../context/AuthContext";
+import { useAppContext } from "../context/AppContext";
 import { WEEKS } from "../data";
 
 export function StudentDashboardPage() {
   const { user, logout } = useAuthContext();
+  const { tx } = useAppContext();
 
   const completed = user?.completedLessons.length || 0;
   const total = WEEKS.reduce((sum, week) => sum + week.days.length, 0);
@@ -24,31 +26,31 @@ export function StudentDashboardPage() {
   return (
     <>
       <section className="page-header">
-        <h1>Student Dashboard</h1>
-        <p className="lead">Welcome back, {user.fullName}</p>
+        <h1>{tx("student.title")}</h1>
+        <p className="lead">{tx("student.welcome", { name: user.fullName })}</p>
       </section>
 
       <section className="stats-grid">
         <article className="card stat-card">
-          <h3>Progress</h3>
+          <h3>{tx("student.progress")}</h3>
           <p className="stat-value">{user.progressPct}%</p>
         </article>
         <article className="card stat-card">
-          <h3>Completed Lessons</h3>
+          <h3>{tx("student.completed_lessons")}</h3>
           <p className="stat-value">{completed}</p>
         </article>
         <article className="card stat-card">
-          <h3>Remaining Lessons</h3>
+          <h3>{tx("student.remaining_lessons")}</h3>
           <p className="stat-value">{remaining}</p>
         </article>
         <article className="card stat-card">
-          <h3>Status</h3>
-          <p className="stat-value">{user.status}</p>
+          <h3>{tx("student.status")}</h3>
+          <p className="stat-value">{user.status === "active" ? tx("status.active") : tx("status.disabled")}</p>
         </article>
       </section>
 
       <section className="card">
-        <h2>Assigned Courses</h2>
+        <h2>{tx("student.assigned_courses")}</h2>
         <ul className="checklist">
           {user.assignedCourses.map((course) => (
             <li key={course}>{course}</li>
@@ -57,14 +59,14 @@ export function StudentDashboardPage() {
       </section>
 
       <section className="card table-wrap">
-        <h2>Weekly Progress</h2>
+        <h2>{tx("student.weekly_progress")}</h2>
         <table className="week-table">
           <thead>
             <tr>
-              <th>Week</th>
-              <th>Completed</th>
-              <th>Remaining</th>
-              <th>Percent</th>
+              <th>{tx("student.col_week")}</th>
+              <th>{tx("student.col_completed")}</th>
+              <th>{tx("student.col_remaining")}</th>
+              <th>{tx("student.col_percent")}</th>
             </tr>
           </thead>
           <tbody>
@@ -73,7 +75,7 @@ export function StudentDashboardPage() {
               return (
                 <tr key={week.weekNum}>
                   <td>
-                    <Link to={`/week/${week.weekNum}`}>Week {week.weekNum}</Link>
+                    <Link to={`/week/${week.weekNum}`}>{tx("student.col_week")} {week.weekNum}</Link>
                   </td>
                   <td>{week.done}</td>
                   <td>{week.total - week.done}</td>
@@ -87,8 +89,8 @@ export function StudentDashboardPage() {
 
       <section className="card">
         <div className="action-row">
-          <Link to="/" className="btn">Open Curriculum</Link>
-          <button className="btn-ghost" onClick={logout}>Logout</button>
+          <Link to="/" className="btn">{tx("student.open_curriculum")}</Link>
+          <button className="btn-ghost" onClick={logout}>{tx("common.logout")}</button>
         </div>
       </section>
     </>

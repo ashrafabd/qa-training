@@ -1,3 +1,5 @@
+import { dictionaries, type LocaleCode, type LocaleKey } from "../locales";
+
 export function tr(value, lang) {
   if (value == null) return "";
   if (typeof value === "string" || typeof value === "number") return value;
@@ -10,6 +12,12 @@ export function tr(value, lang) {
 
 export function fmt(template, vars) {
   return String(template).replace(/\{(\w+)\}/g, (_, key) => (vars[key] != null ? vars[key] : ""));
+}
+
+export function tk(key: LocaleKey, lang: LocaleCode, vars: Record<string, string | number> = {}) {
+  const dict = dictionaries[lang] || dictionaries.en;
+  const template = dict[key] || dictionaries.en[key] || key;
+  return fmt(template, vars);
 }
 
 export function fmtTime(timeText, lang) {

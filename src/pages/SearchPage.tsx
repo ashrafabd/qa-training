@@ -9,7 +9,7 @@ export function SearchPage({ curriculum }) {
   const { q } = useParams();
   const query = decodeURIComponent(q || "");
   const { WEEKS, UI } = curriculum;
-  const { t, lang } = useAppContext();
+  const { t, tx, lang } = useAppContext();
 
   useScrollTop([q]);
 
@@ -59,7 +59,7 @@ export function SearchPage({ curriculum }) {
         <div className="search-list">
           {hits.map((hit, index) => (
             <Link className="search-hit" to={`/week/${hit.week.num}`} key={`${hit.week.num}-${hit.day.dayNum}-${index}`}>
-              <span className={`wk-pill phase-dot-${hit.week.phase}`}>W{hit.week.num} D{hit.day.dayNum}</span>
+              <span className={`wk-pill phase-dot-${hit.week.phase}`}>{tx("search.week_day", { week: hit.week.num, day: hit.day.dayNum })}</span>
               <div>
                 <strong>{t(hit.day.title)}</strong>
                 <div className="muted small">

@@ -44,7 +44,7 @@ export function Sidebar({ phases, weeks, ui }: { phases: any[]; weeks: any[]; ui
 
                 return (
                   <NavLink className={linkClass("side-week")} to={`/week/${week.num}`} key={week.num}>
-                    <span className="sw-num">W{week.num}</span>
+                    <span className="sw-num">{tx("common.week_short")}{week.num}</span>
                     <span className="sw-title">{t(week.title)}</span>
                     <span className={`sw-prog ${done === total ? "complete" : ""}`}>{done}/{total}</span>
                   </NavLink>
